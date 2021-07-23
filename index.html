@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <title>Riffle</title>
+    <link rel="stylesheet" href="app.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="status-message" class="hidden"></div>
+
+    <h1 class="title">
+      Riffle
+    </h1>
+
+    <div class="intro-description">Let's blend some audio!</div>
+
+    <label for="file1">File 1</input>
+    <input id="file1" class="input-source" type="file" accept="audio/*, .m4a,.ogg,.mp3,.wav" />
+
+    <label for="file2">File 2</input>
+    <input id="file2" class="input-source" type="file" accept="audio/*, .m4a,.ogg,.mp3,.wav" />
+
+    <div class="blend-controls"></div>
+
+    <div id="version-info"></div>
+
+    <script src="index.js"></script>
+  </body>
+</html>
