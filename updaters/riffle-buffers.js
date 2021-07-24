@@ -1,4 +1,9 @@
-export function riffleBuffers({ ctx, audioBuffers, preserveTempo = false }) {
+export function riffleBuffers({
+  ctx,
+  audioBuffers,
+  preserveTempo = false,
+  samplesPerChunk = 1,
+}) {
   const numBufs = audioBuffers.length;
   const longestBufferLength = audioBuffers
     .map((b) => b.length)
@@ -21,12 +26,22 @@ export function riffleBuffers({ ctx, audioBuffers, preserveTempo = false }) {
     }
 
     if (preserveTempo) {
-      for (let j = i; j < buffer.length; j += numBufs) {
-        writeToDestArrays(data0, data1, j, j);
+      for (
+        let j = i * samplesPerChunk;
+        j < buffer.length;
+        j += numBufs * samplesPerChunk
+      ) {
+        for (let k = 0; k < samplesPerChunk; ++k) {
+          const index = j + k;
+          writeToDestArrays(data0, data1, index, index);
+        }
       }
     } else {
       for (let j = 0; j < buffer.length; ++j) {
-        const destIndex = numBufs * j + i;
+        const chunkIndex = ~~(j / samplesPerChunk);
+        const blockIndex = chunkIndex * numBufs;
+        const offset = j % samplesPerChunk;
+        const destIndex = (i + blockIndex) * samplesPerChunk + offset;
         writeToDestArrays(data0, data1, j, destIndex);
       }
     }

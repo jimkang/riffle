@@ -24,7 +24,7 @@ var { getCurrentContext } = ContextKeeper();
   routeState.routeFromHash();
 })();
 
-async function followRoute({ preserveTempo }) {
+async function followRoute({ preserveTempo, samplesPerChunk }) {
   console.log('Hey');
   var { error, values } = await ep(getCurrentContext);
   if (error) {
@@ -52,7 +52,12 @@ async function followRoute({ preserveTempo }) {
       return;
     }
 
-    var combinedBuffer = riffleBuffers({ ctx, audioBuffers, preserveTempo });
+    var combinedBuffer = riffleBuffers({
+      ctx,
+      audioBuffers,
+      preserveTempo,
+      samplesPerChunk: +samplesPerChunk,
+    });
     console.log('Combined buffer', combinedBuffer);
 
     renderResultAudio({ audioBuffer: combinedBuffer });
