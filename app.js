@@ -3,8 +3,14 @@ import handleError from 'handle-error-web';
 import { version } from './package.json';
 import ep from 'errorback-promise';
 import { renderSources } from './renderers/render-sources';
+import { renderResultAudio } from './renderers/render-result-audio';
+import { riffleBuffers } from './updaters/riffle-buffers';
+import ContextKeeper from 'audio-context-singleton';
+import { decodeArrayBuffer } from './tasks/decode-array-buffer';
+import { queue } from 'd3-queue';
 
 var routeState;
+var { getCurrentContext } = ContextKeeper();
 
 (async function go() {
   window.onerror = reportTopLevelError;
@@ -13,17 +19,44 @@ var routeState;
   routeState = RouteState({
     followRoute,
     windowObject: window,
+    propsToCoerceToBool: ['preserveTempo'],
   });
   routeState.routeFromHash();
 })();
 
-function followRoute() {
+async function followRoute({ preserveTempo }) {
   console.log('Hey');
-  renderSources({ onBuffers });
-}
+  var { error, values } = await ep(getCurrentContext);
+  if (error) {
+    handleError(error);
+    return;
+  }
 
-function onBuffers(buffers) {
-  console.log('Got buffers', buffers);
+  var ctx = values[0];
+
+  renderSources({ onBuffers });
+
+  async function onBuffers(buffers) {
+    if (buffers.length < 2) {
+      return;
+    }
+
+    var q = queue();
+    buffers.forEach((buffer) => q.defer(decodeArrayBuffer, buffer));
+    q.awaitAll(useAudioBuffers);
+  }
+
+  function useAudioBuffers(error, audioBuffers) {
+    if (error) {
+      handleError(error);
+      return;
+    }
+
+    var combinedBuffer = riffleBuffers({ ctx, audioBuffers, preserveTempo });
+    console.log('Combined buffer', combinedBuffer);
+
+    renderResultAudio({ audioBuffer: combinedBuffer });
+  }
 }
 
 function reportTopLevelError(msg, url, lineNo, columnNo, error) {
