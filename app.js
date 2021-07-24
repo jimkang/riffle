@@ -52,6 +52,15 @@ async function followRoute({ preserveTempo, samplesPerChunk }) {
       return;
     }
 
+    renderResultAudio({
+      audioBuffer: audioBuffers[0],
+      containerSelector: '.file1-audio',
+    });
+    renderResultAudio({
+      audioBuffer: audioBuffers[1],
+      containerSelector: '.file2-audio',
+    });
+
     var combinedBuffer = riffleBuffers({
       ctx,
       audioBuffers,
@@ -60,7 +69,10 @@ async function followRoute({ preserveTempo, samplesPerChunk }) {
     });
     console.log('Combined buffer', combinedBuffer);
 
-    renderResultAudio({ audioBuffer: combinedBuffer });
+    renderResultAudio({
+      audioBuffer: combinedBuffer,
+      containerSelector: '.result-audio',
+    });
   }
 }
 
